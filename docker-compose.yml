@@ -21,6 +21,7 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
       - ./database/insercion_mysql.sql:/docker-entrypoint-initdb.d/02_data.sql:ro
       - ./database/insert_usuario.sql:/docker-entrypoint-initdb.d/03_usuarios.sql:ro
+      - ./database/metricas_feria.sql:/docker-entrypoint-initdb.d/04_metricas_feria.sql:ro
 
     networks:
       - ferias_network
@@ -36,7 +37,7 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
       --default-authentication-plugin=mysql_native_password
-      --log-bin-trust-function-creators=ON
+      --log_bin_trust_function_creators=1
 
 volumes:
   mysql_data:
