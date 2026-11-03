@@ -1158,7 +1158,6 @@ export const ReportesPage: React.FC = () => {
                   </div>
                   <div style={{ fontSize: '2.4rem', fontWeight: 700, color: '#fff' }}>{metricas.totalStands}</div>
                   <div style={{ fontSize: '0.78rem', color: '#818cf8', marginTop: '0.25rem' }}>
-                    Calculado con <code>fn_total_stands</code>
                   </div>
                 </div>
 
@@ -1169,7 +1168,6 @@ export const ReportesPage: React.FC = () => {
                   </div>
                   <div style={{ fontSize: '2.4rem', fontWeight: 700, color: '#10b981' }}>{metricas.standsOcupados}</div>
                   <div style={{ fontSize: '0.78rem', color: '#10b981', marginTop: '0.25rem' }}>
-                    Calculado con <code>fn_stands_ocupados</code>
                   </div>
                 </div>
 
@@ -1180,7 +1178,6 @@ export const ReportesPage: React.FC = () => {
                   </div>
                   <div style={{ fontSize: '2.4rem', fontWeight: 700, color: '#f59e0b' }}>{metricas.totalExpositores}</div>
                   <div style={{ fontSize: '0.78rem', color: '#f59e0b', marginTop: '0.25rem' }}>
-                    Calculado con <code>fn_total_expositores</code>
                   </div>
                 </div>
 
@@ -1193,7 +1190,6 @@ export const ReportesPage: React.FC = () => {
                     Bs {Number(metricas.montoTotalPatrocinio).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#c084fc', marginTop: '0.25rem' }}>
-                    Calculado con <code>fn_monto_total_patrocinio</code>
                   </div>
                 </div>
               </div>
@@ -1208,10 +1204,6 @@ export const ReportesPage: React.FC = () => {
                       <span className="badge badge-primary">{metricas.porcentajeOcupacion}%</span>
                     </div>
 
-                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.75rem', lineHeight: 1.5 }}>
-                      Calculado por <code>fn_porcentaje_ocupacion_feria()</code> mediante la fórmula:{' '}
-                      <code>(stands_ocupados * 100) / total_stands</code> con protección ante división entre cero.
-                    </p>
 
                     {/* Big Visual Progress Bar */}
                     <div style={{ width: '100%', height: '28px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '14px', overflow: 'hidden', padding: '4px', marginBottom: '1rem' }}>
@@ -1251,21 +1243,16 @@ export const ReportesPage: React.FC = () => {
                       <span className="badge badge-success">{metricas.estadoDeterminado}</span>
                     </div>
 
-                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                      El procedimiento <code>sp_actualizar_estado_feria_fecha()</code> evalúa la función{' '}
-                      <code>fn_determinar_estado_feria()</code> para sincronizar automáticamente el estado de la feria según sus fechas
-                      de inicio y fin con respecto a <code>CURRENT_DATE</code>.
-                    </p>
 
                     <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '1rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
                       <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-                        Reglas aplicadas por <code>fn_determinar_estado_feria</code>:
+                        Reglas aplicadas:
                       </div>
                       <ul style={{ paddingLeft: '1.25rem', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.6 }}>
                         <li>Si está "Cancelada", se preserva su cancelación.</li>
-                        <li>Si CURRENT_DATE &lt; fecha_ini &rarr; <strong>Planificada</strong></li>
-                        <li>Si CURRENT_DATE &le; fecha_fin &rarr; <strong>Activa</strong></li>
-                        <li>Si CURRENT_DATE &gt; fecha_fin &rarr; <strong>Finalizada</strong></li>
+                        <li>fecha actual &lt; fecha_ini &rarr; <strong>Planificada</strong></li>
+                        <li>fecha actual &le; fecha_fin &rarr; <strong>Activa</strong></li>
+                        <li>fecha actual &gt; fecha_fin &rarr; <strong>Finalizada</strong></li>
                       </ul>
                     </div>
                   </div>
@@ -1277,7 +1264,7 @@ export const ReportesPage: React.FC = () => {
                     style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.85rem' }}
                   >
                     {updatingEstado ? <RefreshCw className="spin" size={16} /> : <Zap size={16} />}
-                    {updatingEstado ? 'Ejecutando procedimiento...' : 'Ejecutar sp_actualizar_estado_feria_fecha()'}
+                    {updatingEstado ? 'Ejecutando procedimiento...' : 'Ponerlo a prueba'}
                   </button>
                 </div>
               </div>
@@ -1312,7 +1299,7 @@ export const ReportesPage: React.FC = () => {
                 </div>
 
                 <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
-                  Cambio automático a "Ocupado" (trg_ocupar_stand)
+                  Cambio automático a "Ocupado"
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
                   Al registrar un expositor en un stand mediante <code>CONFORMAN</code>, el trigger actualiza inmediatamente
@@ -1418,7 +1405,7 @@ export const ReportesPage: React.FC = () => {
                 </div>
 
                 <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
-                  Validación de Stock Negativo (trg_validar_stock)
+                  Validación de Stock Negativo
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
                   Impide que se registre o actualice una oferta con stock menor a cero. Si se intenta ingresar un valor negativo,
@@ -1518,7 +1505,7 @@ export const ReportesPage: React.FC = () => {
                 </div>
 
                 <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
-                  Validación de Fechas de Feria (trg_validar_fechas_feria)
+                  Validación de Fechas de Feria
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
                   Impide crear o modificar una feria cuya fecha de finalización sea anterior a la fecha de inicio.

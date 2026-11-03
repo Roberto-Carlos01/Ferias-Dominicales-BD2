@@ -59,9 +59,6 @@ export const Navbar: React.FC = () => {
           <Link to="/ferias" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#cbd5e1', fontSize: '0.92rem', fontWeight: 500 }}>
             <Calendar size={16} /> Catálogo de Ferias
           </Link>
-          <Link to="/ubicaciones" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#cbd5e1', fontSize: '0.92rem', fontWeight: 500 }}>
-            <MapPin size={16} /> Recintos Feriales
-          </Link>
           <Link to="/estadisticas" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#cbd5e1', fontSize: '0.92rem', fontWeight: 500 }}>
             <BarChart3 size={16} /> Métricas y Estadísticas
           </Link>
