@@ -1392,7 +1392,7 @@ export const ReportesPage: React.FC = () => {
                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
               >
                 {trigger1Loading ? <RefreshCw className="spin" size={16} /> : <CheckCircle2 size={16} />}
-                {trigger1Loading ? 'Insertando en CONFORMAN...' : 'Probar Trigger trg_ocupar_stand'}
+                {trigger1Loading ? 'Insertando en CONFORMAN...' : 'Asignar expositor a un stand'}
               </button>
             </div>
 
@@ -1492,7 +1492,7 @@ export const ReportesPage: React.FC = () => {
                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
               >
                 {trigger2Loading ? <RefreshCw className="spin" size={16} /> : <Zap size={16} />}
-                {trigger2Loading ? 'Enviando a MySQL...' : 'Intentar Guardar Oferta (Probar Trigger)'}
+                {trigger2Loading ? 'Enviando a MySQL...' : 'Intentar Guardar Oferta'}
               </button>
             </div>
 
@@ -1595,7 +1595,7 @@ export const ReportesPage: React.FC = () => {
                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
               >
                 {trigger3Loading ? <RefreshCw className="spin" size={16} /> : <Zap size={16} />}
-                {trigger3Loading ? 'Guardando en FERIA...' : 'Intentar Crear Feria (Probar Trigger)'}
+                {trigger3Loading ? 'Guardando en FERIA...' : 'Intentar Crear Feria'}
               </button>
             </div>
           </div>

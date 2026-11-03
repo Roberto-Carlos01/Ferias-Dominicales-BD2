@@ -11,6 +11,7 @@ import {
   Store,
   MapPin,
   Search,
+  Layers,
 } from 'lucide-react';
 
 export const AdminFeriasPage: React.FC = () => {
@@ -190,6 +191,9 @@ export const AdminFeriasPage: React.FC = () => {
                     <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
                       <Link to={`/ferias/${f.idFeria}`} className="btn btn-secondary btn-sm" title="Ver detalle público">
                         <Store size={14} />
+                      </Link>
+                      <Link to={`/admin/ferias/${f.idFeria}/stands`} className="btn btn-secondary btn-sm" title="Gestionar Stands">
+                        <Layers size={14} />
                       </Link>
                       <button onClick={() => handleOpenEdit(f)} className="btn btn-secondary btn-sm" title="Editar">
                         <Edit2 size={14} />

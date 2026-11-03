@@ -108,6 +108,14 @@ export const AdminDashboardPage: React.FC = () => {
       count: '5 Triggers',
       label: 'Validaciones',
     },
+    {
+      title: 'Stands por Feria',
+      desc: 'Agregar, editar y eliminar stands (entidad débil) asignados a cada feria dominical.',
+      icon: <Store size={24} style={{ color: '#10b981' }} />,
+      link: '/admin/ferias',
+      count: 'Stands',
+      label: 'Gestionar',
+    },
   ];
 
   return (

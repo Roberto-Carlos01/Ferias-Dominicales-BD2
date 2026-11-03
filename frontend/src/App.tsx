@@ -30,6 +30,7 @@ import { AdminProductosPage } from './pages/admin/AdminProductosPage';
 import { AdminInstitucionesPage } from './pages/admin/AdminInstitucionesPage';
 import { AdminPatrocinadoresPage } from './pages/admin/AdminPatrocinadoresPage';
 import { AdminOrganizadoresPage } from './pages/admin/AdminOrganizadoresPage';
+import { AdminStandsPage } from './pages/admin/AdminStandsPage';
 
 export const App: React.FC = () => {
   return (
@@ -124,6 +125,14 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute requireAdmin>
                     <AdminOrganizadoresPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/ferias/:feriaId/stands"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminStandsPage />
                   </ProtectedRoute>
                 }
               />
