@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Feria } from '../ferias/feria.entity';
@@ -58,6 +58,59 @@ export class DashboardService {
       totalStands,
       totalUsuarios,
       timestamp: new Date().toISOString(),
+    };
+  }
+  async getMetricasFeria(idFeria: number) {
+    const existe = await this.feriaRepo.query(
+      `SELECT IDFERIA
+      FROM FERIA
+      WHERE IDFERIA = ?
+      LIMIT 1`,
+      [idFeria],
+    );
+
+    if (!existe.length) {
+      throw new NotFoundException(
+        'La feria indicada no existe',
+      );
+    }
+
+    // 2. Ejecutar el procedimiento almacenado.
+    const resultado = await this.feriaRepo.query(
+      'CALL sp_metricas_clave_feria(?)',
+      [idFeria],
+    );
+
+    // 3. Obtener la primera fila del procedimiento.
+    const filas = Array.isArray(resultado?.[0])
+      ? resultado[0]
+      : resultado;
+
+    const datos = Array.isArray(filas)
+      ? filas[0]
+      : undefined;
+
+    if (!datos) {
+      throw new NotFoundException(
+        'No se encontraron métricas para la feria',
+      );
+    }
+
+    // 4. Ejecutar las dos funciones MySQL.
+    const funciones = await this.feriaRepo.query(
+      `SELECT
+        fn_porcentaje_ocupacion_feria(?)
+          AS PORCENTAJE_OCUPACION,
+
+        fn_monto_patrocinio_feria(?)
+          AS MONTO_TOTAL_PATROCINIO`,
+      [idFeria, idFeria],
+    );
+
+    // 5. Combinar los resultados.
+    return {
+      ...datos,
+      ...(funciones[0] ?? {}),
     };
   }
 }
