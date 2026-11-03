@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Sparkles,
+  Database,
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -63,6 +64,9 @@ export const Navbar: React.FC = () => {
           </Link>
           <Link to="/estadisticas" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#cbd5e1', fontSize: '0.92rem', fontWeight: 500 }}>
             <BarChart3 size={16} /> Métricas y Estadísticas
+          </Link>
+          <Link to="/reportes" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f59e0b', fontSize: '0.92rem', fontWeight: 600 }}>
+            <Database size={16} /> Procedimientos & Reportes
           </Link>
         </div>
 
@@ -120,6 +124,7 @@ export const Navbar: React.FC = () => {
           <Link to="/ferias" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1' }}>Catálogo de Ferias</Link>
           <Link to="/ubicaciones" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1' }}>Recintos Feriales</Link>
           <Link to="/estadisticas" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1' }}>Métricas y Estadísticas</Link>
+          <Link to="/reportes" onClick={() => setMobileMenuOpen(false)} style={{ color: '#f59e0b', fontWeight: 600 }}>Procedimientos & Reportes (BD)</Link>
           <div style={{ height: '1px', background: 'var(--border)', margin: '0.5rem 0' }} />
           {isAuthenticated ? (
             <>

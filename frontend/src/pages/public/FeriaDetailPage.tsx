@@ -18,6 +18,7 @@ import {
   ShoppingBag,
   Palette,
   CheckCircle,
+  TrendingUp,
 } from 'lucide-react';
 
 export const FeriaDetailPage: React.FC = () => {
@@ -98,9 +99,27 @@ export const FeriaDetailPage: React.FC = () => {
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem', width: '100%' }}>
       {/* Navigation Breadcrumb */}
-      <Link to="/ferias" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-        <ArrowLeft size={16} /> Volver al listado de ferias
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <Link to="/ferias" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+          <ArrowLeft size={16} /> Volver al listado de ferias
+        </Link>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Link
+            to={`/reportes?tab=metricas&feria=${id}`}
+            className="btn btn-secondary btn-sm"
+            style={{ borderColor: 'rgba(99, 102, 241, 0.4)', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <TrendingUp size={15} /> Métricas SQL (SP)
+          </Link>
+          <Link
+            to={`/reportes?tab=catalogo&feria=${id}`}
+            className="btn btn-secondary btn-sm"
+            style={{ borderColor: 'rgba(245, 158, 11, 0.4)', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Store size={15} /> Catálogo Cursor SQL
+          </Link>
+        </div>
+      </div>
 
       {/* Main Hero Header */}
       <div className="glass-card" style={{ padding: '2.5rem', marginBottom: '2.5rem', position: 'relative' }}>

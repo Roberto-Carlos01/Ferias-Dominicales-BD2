@@ -58,6 +58,10 @@ export class OfertasService {
       throw new ConflictException('Este producto ya está registrado en este stand');
     }
 
+    if (dto.stock !== undefined && dto.stock < 0) {
+      throw new BadRequestException('El stock no puede ser menor a cero');
+    }
+
     const oferta = this.repo.create({
       idFeria,
       nroStand,
@@ -86,7 +90,12 @@ export class OfertasService {
     }
 
     if (dto.unidadMedida !== undefined) oferta.unidadMedida = dto.unidadMedida;
-    if (dto.stock !== undefined) oferta.stock = dto.stock;
+    if (dto.stock !== undefined) {
+      if (dto.stock < 0) {
+        throw new BadRequestException('El stock no puede ser menor a cero');
+      }
+      oferta.stock = dto.stock;
+    }
 
     await this.repo.save(oferta);
     return { message: 'Oferta actualizada exitosamente', data: oferta };

@@ -35,6 +35,31 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
 
       code = this.getCode(status);
+    } else if (exception && typeof exception === 'object') {
+      const dbErr = exception as any;
+      // Capturar errores provocados por SIGNAL SQLSTATE '45000' en triggers y procedimientos de MySQL
+      if (
+        dbErr.sqlState === '45000' ||
+        dbErr.errno === 1644 ||
+        dbErr.code === 'ER_SIGNAL_EXCEPTION'
+      ) {
+        status = HttpStatus.BAD_REQUEST;
+        code = 'TRIGGER_VALIDATION_ERROR';
+        let rawMsg = String(dbErr.sqlMessage || dbErr.message || 'Error de validación en base de datos');
+        // Limpiar prefijo Error: si existe para mayor claridad
+        if (rawMsg.toLowerCase().startsWith('error: ')) {
+          rawMsg = rawMsg.substring(7).trim();
+        }
+        message = rawMsg;
+      } else if (dbErr.code === 'ER_DUP_ENTRY' || dbErr.errno === 1062) {
+        status = HttpStatus.CONFLICT;
+        code = 'DUPLICATE_ENTRY';
+        message = 'El registro ya existe en el sistema';
+      } else if (dbErr.code === 'ER_NO_REFERENCED_ROW_2' || dbErr.errno === 1452) {
+        status = HttpStatus.BAD_REQUEST;
+        code = 'FOREIGN_KEY_VIOLATION';
+        message = 'El elemento relacionado no existe en la base de datos';
+      }
     }
 
     response.status(status).json({

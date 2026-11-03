@@ -12,6 +12,7 @@ import { FeriaDetailPage } from './pages/public/FeriaDetailPage';
 import { UbicacionesPage } from './pages/public/UbicacionesPage';
 import { ProductosPage } from './pages/public/ProductosPage';
 import { EstadisticasPage } from './pages/public/EstadisticasPage';
+import { ReportesPage } from './pages/reportes/ReportesPage';
 
 // Auth Pages
 import { LoginPage } from './pages/auth/LoginPage';
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
               <Route path="/ubicaciones" element={<UbicacionesPage />} />
               <Route path="/productos" element={<ProductosPage />} />
               <Route path="/estadisticas" element={<EstadisticasPage />} />
+              <Route path="/reportes" element={<ReportesPage />} />
 
               {/* Auth Routes */}
               <Route path="/login" element={<LoginPage />} />
@@ -122,6 +124,14 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute requireAdmin>
                     <AdminOrganizadoresPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/reportes"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <ReportesPage />
                   </ProtectedRoute>
                 }
               />

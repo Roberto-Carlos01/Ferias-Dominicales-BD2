@@ -88,6 +88,17 @@ export class ParticipantesService {
 
     await this.conformanRepo.save(item);
 
+    // Si el trigger trg_ocupar_stand aún no estuviera creado en MySQL, aplicamos el cambio de estado como fallback
+    try {
+      const standCheck = await this.standRepo.findOne({ where: { idFeria, nroStand: dto.nroStand } });
+      if (standCheck && standCheck.estado !== 'Ocupado') {
+        standCheck.estado = 'Ocupado';
+        await this.standRepo.save(standCheck);
+      }
+    } catch {
+      // ignore
+    }
+
     return {
       message: 'Participante registrado exitosamente en la feria',
       participante: {
@@ -122,6 +133,17 @@ export class ParticipantesService {
     if (dto.cargo !== undefined) item.cargo = dto.cargo;
 
     await this.conformanRepo.save(item);
+
+    // Si el trigger trg_ocupar_stand aún no estuviera creado en MySQL, aplicamos el cambio de estado como fallback
+    try {
+      const standCheck = await this.standRepo.findOne({ where: { idFeria, nroStand: dto.nroStand } });
+      if (standCheck && standCheck.estado !== 'Ocupado') {
+        standCheck.estado = 'Ocupado';
+        await this.standRepo.save(standCheck);
+      }
+    } catch {
+      // ignore
+    }
     return { message: 'Participación actualizada exitosamente' };
   }
 

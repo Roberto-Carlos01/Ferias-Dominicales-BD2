@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Feria } from './feria.entity';
@@ -113,6 +113,12 @@ export class FeriasService {
   }
 
   async create(dto: CreateFeriaDto) {
+    if (dto.fechaIni && dto.fechaFin && dto.fechaFin < dto.fechaIni) {
+      throw new BadRequestException(
+        'La fecha de finalización no puede ser anterior a la fecha de inicio',
+      );
+    }
+
     let idFeria = dto.idFeria;
     if (!idFeria) {
       const maxItem = await this.feriaRepo
@@ -142,6 +148,14 @@ export class FeriasService {
   async update(id: number, dto: UpdateFeriaDto) {
     const feria = await this.feriaRepo.findOne({ where: { idFeria: id } });
     if (!feria) throw new NotFoundException(`Feria con ID ${id} no encontrada`);
+
+    const fechaIniFinal = dto.fechaIni ?? feria.fechaIni;
+    const fechaFinFinal = dto.fechaFin ?? feria.fechaFin;
+    if (fechaIniFinal && fechaFinFinal && fechaFinFinal < fechaIniFinal) {
+      throw new BadRequestException(
+        'La fecha de finalización no puede ser anterior a la fecha de inicio',
+      );
+    }
 
     if (dto.nombre !== undefined) feria.nombre = dto.nombre;
     if (dto.descripcion !== undefined) feria.descripcion = dto.descripcion;

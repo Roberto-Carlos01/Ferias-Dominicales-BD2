@@ -13,6 +13,8 @@ import {
   TrendingUp,
   Award,
   Building2,
+  Database,
+  ShieldAlert,
 } from 'lucide-react';
 
 export const AdminDashboardPage: React.FC = () => {
@@ -89,6 +91,22 @@ export const AdminDashboardPage: React.FC = () => {
       link: '/admin/instituciones',
       count: stats?.totalInstituciones ?? 0,
       label: 'Instituciones',
+    },
+    {
+      title: 'Procedimientos y Cursores BD',
+      desc: 'Ejecutar cursores de recintos, categorías, catálogo y procedimientos de métricas en MySQL.',
+      icon: <Database size={24} style={{ color: '#818cf8' }} />,
+      link: '/admin/reportes',
+      count: 'SQL SP',
+      label: 'Cursores',
+    },
+    {
+      title: 'Laboratorio de Triggers',
+      desc: 'Probar en vivo los 5 triggers de MySQL: ocupación de stands, stock y validación de fechas.',
+      icon: <ShieldAlert size={24} style={{ color: '#f59e0b' }} />,
+      link: '/admin/reportes?tab=triggers',
+      count: '5 Triggers',
+      label: 'Validaciones',
     },
   ];
 

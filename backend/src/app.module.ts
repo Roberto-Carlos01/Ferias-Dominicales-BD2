@@ -15,6 +15,7 @@ import { OrganizadoresModule } from './organizadores/organizadores.module';
 import { PatrocinadoresModule } from './patrocinadores/patrocinadores.module';
 import { OfertasModule } from './ofertas/ofertas.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ReportesModule } from './reportes/reportes.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     PatrocinadoresModule,
     OfertasModule,
     DashboardModule,
+    ReportesModule,
   ],
 })
 export class AppModule {}
