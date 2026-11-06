@@ -2,9 +2,8 @@
 -- SCRIPT DE INSERCIÓN DE DATOS - MySQL
 -- GRUPO #8: FERIAS DE FIN DE SEMANA
 -- =========================================================
-
+SET NAMES 'utf8mb4';
 SET FOREIGN_KEY_CHECKS = 0;
-
 
 INSERT INTO UBICACION (IDUBICACION, NOMBRE, CIUDAD, ZONA, CAPACIDAD, REFERENCIA) VALUES
   (1, 'Campo Ferial Chuquiago Marka', 'La Paz', 'Zona Sur - Achumani', 5000, 'Av. Costanera, cerca de Cota Cota'),

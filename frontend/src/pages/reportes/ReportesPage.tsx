@@ -48,13 +48,13 @@ export const ReportesPage: React.FC = () => {
   const [recintoCiudadFilter, setRecintoCiudadFilter] = useState('ALL');
   const [recintosSource, setRecintosSource] = useState('');
 
-  // Tab 2: Categorías (Cursor 2)
+  // Tab 2: CategorÃ­as (Cursor 2)
   const [categorias, setCategorias] = useState<any[]>([]);
   const [loadingCategorias, setLoadingCategorias] = useState(false);
   const [expandedCategoria, setExpandedCategoria] = useState<string | null>(null);
   const [categoriasSource, setCategoriasSource] = useState('');
 
-  // Tab 3: Catálogo por Feria (Cursor 3)
+  // Tab 3: CatÃ¡logo por Feria (Cursor 3)
   const [catalogo, setCatalogo] = useState<any[]>([]);
   const [loadingCatalogo, setLoadingCatalogo] = useState(false);
   const [catalogoSearch, setCatalogoSearch] = useState('');
@@ -62,7 +62,7 @@ export const ReportesPage: React.FC = () => {
   const [catalogoViewMode, setCatalogoViewMode] = useState<'stands' | 'grid'>('stands');
   const [catalogoSource, setCatalogoSource] = useState('');
 
-  // Tab 4: Métricas Clave de Feria
+  // Tab 4: MÃ©tricas Clave de Feria
   const [metricas, setMetricas] = useState<any>(null);
   const [loadingMetricas, setLoadingMetricas] = useState(false);
   const [updatingEstado, setUpdatingEstado] = useState(false);
@@ -77,7 +77,13 @@ export const ReportesPage: React.FC = () => {
   const [trigger2Loading, setTrigger2Loading] = useState(false);
   const [trigger2Result, setTrigger2Result] = useState<any>(null);
   const [trigger2Error, setTrigger2Error] = useState<string | null>(null);
-  const [t2Stock, setT2Stock] = useState(-5);
+  const [t2Stock, setT2Stock] = useState<number | ''>(-5);
+  const [t2NroStand, setT2NroStand] = useState<number | ''>('');
+  const [t2IdProducto, setT2IdProducto] = useState<number | ''>('');
+  const [t2UnidadMedida, setT2UnidadMedida] = useState('Unidad');
+  const [t2StandsList, setT2StandsList] = useState<any[]>([]);
+  const [t2ProductosList, setT2ProductosList] = useState<any[]>([]);
+  const [t2LoadingSelects, setT2LoadingSelects] = useState(false);
 
   const [trigger3Loading, setTrigger3Loading] = useState(false);
   const [trigger3Result, setTrigger3Result] = useState<any>(null);
@@ -85,7 +91,7 @@ export const ReportesPage: React.FC = () => {
   const [t3FechaIni, setT3FechaIni] = useState('2026-12-25');
   const [t3FechaFin, setT3FechaFin] = useState('2026-12-10');
 
-  // Tab 6: Diagnóstico de la Base de Datos
+  // Tab 6: DiagnÃ³stico de la Base de Datos
   const [diagnostico, setDiagnostico] = useState<any>(null);
   const [loadingDiagnostico, setLoadingDiagnostico] = useState(false);
 
@@ -110,6 +116,32 @@ export const ReportesPage: React.FC = () => {
     setActiveTab(tab);
     setSearchParams({ tab, feria: String(selectedFeriaId) });
   };
+
+  // Cargar stands y productos cuando se va a la tab de triggers o cambia la feria
+  useEffect(() => {
+    if (activeTab !== 'triggers') return;
+    const fetchSelects = async () => {
+      setT2LoadingSelects(true);
+      try {
+        const [standsRes, productosRes] = await Promise.all([
+          apiClient.get(`/reportes/ferias/${selectedFeriaId}/stands-lista`),
+          apiClient.get('/reportes/productos-lista'),
+        ]);
+        const stands = standsRes.data || [];
+        const productos = productosRes.data || [];
+        setT2StandsList(stands);
+        setT2ProductosList(productos);
+        // Autoseleccionar el primero disponible
+        if (stands.length > 0) setT2NroStand(stands[0].nroStand);
+        if (productos.length > 0) setT2IdProducto(productos[0].idProducto);
+      } catch (err) {
+        console.error('Error cargando selectores trigger 2:', err);
+      } finally {
+        setT2LoadingSelects(false);
+      }
+    };
+    fetchSelects();
+  }, [activeTab, selectedFeriaId]);
 
   // 1. Fetch Cursor 1
   useEffect(() => {
@@ -141,8 +173,8 @@ export const ReportesPage: React.FC = () => {
           setCategorias(res.data?.data || []);
           setCategoriasSource(res.data?.source || '');
         } catch (err) {
-          console.error('Error cargando reporte de categorías:', err);
-          toast.error('Error cargando análisis de categorías');
+          console.error('Error cargando reporte de categorÃ­as:', err);
+          toast.error('Error cargando anÃ¡lisis de categorÃ­as');
         } finally {
           setLoadingCategorias(false);
         }
@@ -161,8 +193,8 @@ export const ReportesPage: React.FC = () => {
           setCatalogo(res.data?.data || []);
           setCatalogoSource(res.data?.source || '');
         } catch (err) {
-          console.error('Error cargando catálogo:', err);
-          toast.error('Error cargando catálogo de la feria');
+          console.error('Error cargando catÃ¡logo:', err);
+          toast.error('Error cargando catÃ¡logo de la feria');
         } finally {
           setLoadingCatalogo(false);
         }
@@ -171,7 +203,7 @@ export const ReportesPage: React.FC = () => {
     }
   }, [activeTab, selectedFeriaId]);
 
-  // 4. Fetch Métricas de Feria
+  // 4. Fetch MÃ©tricas de Feria
   useEffect(() => {
     if (activeTab === 'metricas' && selectedFeriaId) {
       const fetchMetricas = async () => {
@@ -180,8 +212,8 @@ export const ReportesPage: React.FC = () => {
           const res = await apiClient.get(`/reportes/ferias/${selectedFeriaId}/metricas`);
           setMetricas(res.data);
         } catch (err) {
-          console.error('Error cargando métricas:', err);
-          toast.error('Error cargando métricas de la feria');
+          console.error('Error cargando mÃ©tricas:', err);
+          toast.error('Error cargando mÃ©tricas de la feria');
         } finally {
           setLoadingMetricas(false);
         }
@@ -190,7 +222,7 @@ export const ReportesPage: React.FC = () => {
     }
   }, [activeTab, selectedFeriaId]);
 
-  // 5. Fetch Diagnóstico BD
+  // 5. Fetch DiagnÃ³stico BD
   useEffect(() => {
     if (activeTab === 'diagnostico') {
       const fetchDiagnostico = async () => {
@@ -199,7 +231,7 @@ export const ReportesPage: React.FC = () => {
           const res = await apiClient.get('/reportes/diagnostico-bd');
           setDiagnostico(res.data);
         } catch (err) {
-          console.error('Error cargando diagnóstico:', err);
+          console.error('Error cargando diagnÃ³stico:', err);
         } finally {
           setLoadingDiagnostico(false);
         }
@@ -208,14 +240,14 @@ export const ReportesPage: React.FC = () => {
     }
   }, [activeTab]);
 
-  // Handler: Actualizar estado de feria según fecha
+  // Handler: Actualizar estado de feria segÃºn fecha
   const handleActualizarEstado = async () => {
     if (!selectedFeriaId) return;
     setUpdatingEstado(true);
     try {
       const res = await apiClient.post(`/reportes/ferias/${selectedFeriaId}/actualizar-estado`);
       toast.success(`Estado actualizado exitosamente: ${res.data.estadoActualizado}`);
-      // Refetch métricas
+      // Refetch mÃ©tricas
       const metRes = await apiClient.get(`/reportes/ferias/${selectedFeriaId}/metricas`);
       setMetricas(metRes.data);
     } catch (err: any) {
@@ -237,7 +269,7 @@ export const ReportesPage: React.FC = () => {
         cargo: t1Cargo,
       });
       setTrigger1Result(res.data);
-      toast.success('Expositor asignado. ¡Stand actualizado a Ocupado por Trigger!');
+      toast.success('Expositor asignado. Â¡Stand actualizado a Ocupado por Trigger!');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Error en la prueba de trigger');
     } finally {
@@ -247,41 +279,45 @@ export const ReportesPage: React.FC = () => {
 
   // Handler: Test Trigger 2 (Stock negativo)
   const handleTestTrigger2 = async () => {
+    if (!t2NroStand) { toast.error('Selecciona un stand'); return; }
+    if (!t2IdProducto) { toast.error('Selecciona un producto'); return; }
+    if (t2Stock === '') { toast.error('Ingresa un valor de stock'); return; }
     setTrigger2Loading(true);
     setTrigger2Result(null);
     setTrigger2Error(null);
     try {
       const res = await apiClient.post('/reportes/triggers/test-stock-negativo', {
         idFeria: Number(selectedFeriaId),
-        nroStand: 1,
-        idProducto: 1,
+        nroStand: Number(t2NroStand),
+        idProducto: Number(t2IdProducto),
         stock: Number(t2Stock),
+        unidadMedida: t2UnidadMedida || 'Unidad',
       });
       setTrigger2Result(res.data);
-      toast.success('Operación aceptada');
+      toast.success('âœ… Stock vÃ¡lido â€” MySQL aceptÃ³ la operaciÃ³n');
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || 'Error desconocido';
       setTrigger2Error(msg);
-      toast.error(`Trigger Activado: ${msg}`);
+      toast.error(`ðŸ›¡ï¸ Trigger bloqueÃ³: ${msg}`);
     } finally {
       setTrigger2Loading(false);
     }
   };
 
-  // Handler: Test Trigger 3 (Fechas feria inválidas)
+  // Handler: Test Trigger 3 (Fechas feria invÃ¡lidas)
   const handleTestTrigger3 = async () => {
     setTrigger3Loading(true);
     setTrigger3Result(null);
     setTrigger3Error(null);
     try {
       const res = await apiClient.post('/reportes/triggers/test-fechas-feria', {
-        nombre: 'Feria Validación Trigger ' + Date.now(),
+        nombre: 'Feria ValidaciÃ³n Trigger ' + Date.now(),
         fechaIni: t3FechaIni,
         fechaFin: t3FechaFin,
-        descripcion: 'Prueba de validación automática por trigger',
+        descripcion: 'Prueba de validaciÃ³n automÃ¡tica por trigger',
       });
       setTrigger3Result(res.data);
-      toast.success('Feria creada con fechas válidas');
+      toast.success('Feria creada con fechas vÃ¡lidas');
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || 'Error desconocido';
       setTrigger3Error(msg);
@@ -350,15 +386,15 @@ export const ReportesPage: React.FC = () => {
             <Database size={13} /> MySQL 8.0 Engine
           </span>
           <span className="badge badge-warning" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-            <Zap size={13} /> Integración Completa
+            <Zap size={13} /> IntegraciÃ³n Completa
           </span>
         </div>
         <h1 style={{ fontSize: '2.4rem', color: '#fff', marginBottom: '0.4rem', fontWeight: 700 }}>
           Centro de Procedimientos, Funciones, Cursores y Triggers
         </h1>
         <p style={{ color: '#94a3b8', fontSize: '1.05rem', maxWidth: '900px' }}>
-          Visualización y control interactivo de los objetos de base de datos implementados en MySQL: cursores de reporte,
-          funciones de ocupación y cálculo, procedimientos de métricas y validación reactiva de triggers.
+          VisualizaciÃ³n y control interactivo de los objetos de base de datos implementados en MySQL: cursores de reporte,
+          funciones de ocupaciÃ³n y cÃ¡lculo, procedimientos de mÃ©tricas y validaciÃ³n reactiva de triggers.
         </p>
       </div>
 
@@ -386,7 +422,7 @@ export const ReportesPage: React.FC = () => {
           className={`btn ${activeTab === 'categorias' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
         >
-          <BarChart3 size={16} /> 2. Categorías (Cursor 2)
+          <BarChart3 size={16} /> 2. CategorÃ­as (Cursor 2)
         </button>
 
         <button
@@ -394,7 +430,7 @@ export const ReportesPage: React.FC = () => {
           className={`btn ${activeTab === 'catalogo' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
         >
-          <Store size={16} /> 3. Catálogo por Feria (Cursor 3)
+          <Store size={16} /> 3. CatÃ¡logo por Feria (Cursor 3)
         </button>
 
         <button
@@ -402,7 +438,7 @@ export const ReportesPage: React.FC = () => {
           className={`btn ${activeTab === 'metricas' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
         >
-          <TrendingUp size={16} /> 4. Métricas & Funciones SQL
+          <TrendingUp size={16} /> 4. MÃ©tricas & Funciones SQL
         </button>
 
         <button
@@ -454,7 +490,7 @@ export const ReportesPage: React.FC = () => {
             </div>
             <div>
               <div style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>
-                Feria Seleccionada para Análisis
+                Feria Seleccionada para AnÃ¡lisis
               </div>
               <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 600 }}>
                 {feriasList.find((f) => f.idFeria === selectedFeriaId)?.nombre || `Feria #${selectedFeriaId}`}
@@ -505,7 +541,7 @@ export const ReportesPage: React.FC = () => {
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
                 Generado mediante el cursor <code>sp_reporte_recintos_feriales()</code>. Recorre recintos, vincula ferias,
-                consolida métricas de stands/expositores y concatena instituciones organizadoras y patrocinadoras.
+                consolida mÃ©tricas de stands/expositores y concatena instituciones organizadoras y patrocinadoras.
               </p>
             </div>
             <div>
@@ -603,7 +639,7 @@ export const ReportesPage: React.FC = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                       <div>
                         <span style={{ fontSize: '0.75rem', color: '#818cf8', fontWeight: 600, textTransform: 'uppercase' }}>
-                          ID Recinto #{r.idUbicacion} • {r.ciudad}
+                          ID Recinto #{r.idUbicacion} â€¢ {r.ciudad}
                         </span>
                         <h3 style={{ fontSize: '1.35rem', color: '#fff', marginTop: '0.2rem' }}>{r.recinto}</h3>
                       </div>
@@ -649,7 +685,7 @@ export const ReportesPage: React.FC = () => {
 
                         <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.85rem' }}>
                           <Calendar size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                          {r.fechaIni || 'N/A'} al {r.fechaFin || 'N/A'} • Tipo: {r.tipo || 'General'}
+                          {r.fechaIni || 'N/A'} al {r.fechaFin || 'N/A'} â€¢ Tipo: {r.tipo || 'General'}
                         </div>
 
                         {/* Indicators from Cursor */}
@@ -710,7 +746,7 @@ export const ReportesPage: React.FC = () => {
                       className="btn btn-secondary btn-sm"
                       style={{ marginTop: '0.75rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}
                     >
-                      Analizar Métricas de esta Feria <ArrowRight size={14} />
+                      Analizar MÃ©tricas de esta Feria <ArrowRight size={14} />
                     </button>
                   )}
                 </div>
@@ -721,7 +757,7 @@ export const ReportesPage: React.FC = () => {
       )}
 
       {/* =========================================================================
-          TAB 2: ANÁLISIS DE CATEGORÍAS (CURSOR 2)
+          TAB 2: ANÃLISIS DE CATEGORÃAS (CURSOR 2)
           ========================================================================= */}
       {activeTab === 'categorias' && (
         <div>
@@ -729,11 +765,11 @@ export const ReportesPage: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.6rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <BarChart3 style={{ color: '#c084fc' }} size={24} /> Análisis Estadístico de Categorías de Productos
+                <BarChart3 style={{ color: '#c084fc' }} size={24} /> AnÃ¡lisis EstadÃ­stico de CategorÃ­as de Productos
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
                 Generado mediante el cursor <code>sp_reporte_categorias_productos()</code>. Agrupa productos, calcula precios promedio,
-                mínimos, máximos, stock acumulado en stands y estimación del inventario total.
+                mÃ­nimos, mÃ¡ximos, stock acumulado en stands y estimaciÃ³n del inventario total.
               </p>
             </div>
             <div>
@@ -746,14 +782,14 @@ export const ReportesPage: React.FC = () => {
           {loadingCategorias ? (
             <div style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
               <RefreshCw className="spin" size={32} style={{ margin: '0 auto 1rem' }} />
-              Cargando estadísticas de categorías mediante cursor SQL...
+              Cargando estadÃ­sticas de categorÃ­as mediante cursor SQL...
             </div>
           ) : (
             <>
               {/* Key KPI Stats */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
             <div className="glass-card" style={{ padding: '1.25rem' }}>
-              <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Total Categorías</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Total CategorÃ­as</div>
               <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff' }}>{categorias.length}</div>
             </div>
             <div className="glass-card" style={{ padding: '1.25rem' }}>
@@ -779,10 +815,10 @@ export const ReportesPage: React.FC = () => {
           {/* Visual Comparison Bars */}
           <div className="glass-card" style={{ padding: '1.75rem', marginBottom: '2rem' }}>
             <h3 style={{ fontSize: '1.15rem', color: '#fff', marginBottom: '1.25rem' }}>
-              Distribución de Productos por Categoría (Gráfico Visual)
+              DistribuciÃ³n de Productos por CategorÃ­a (GrÃ¡fico Visual)
             </h3>
             {categorias.length === 0 ? (
-              <div style={{ color: '#94a3b8' }}>Cargando categorías...</div>
+              <div style={{ color: '#94a3b8' }}>Cargando categorÃ­as...</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {(() => {
@@ -794,7 +830,7 @@ export const ReportesPage: React.FC = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', marginBottom: '0.25rem' }}>
                           <span style={{ color: '#fff', fontWeight: 500 }}>{cat.categoria}</span>
                           <span style={{ color: '#94a3b8' }}>
-                            <strong style={{ color: '#c084fc' }}>{cat.totalProductos} productos</strong> • Stock: {cat.totalStock?.toLocaleString()} • Bs {cat.valorInventario?.toLocaleString()}
+                            <strong style={{ color: '#c084fc' }}>{cat.totalProductos} productos</strong> â€¢ Stock: {cat.totalStock?.toLocaleString()} â€¢ Bs {cat.valorInventario?.toLocaleString()}
                           </span>
                         </div>
                         <div style={{ width: '100%', height: '12px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '6px', overflow: 'hidden' }}>
@@ -819,16 +855,16 @@ export const ReportesPage: React.FC = () => {
           {/* Table View */}
           <div className="glass-card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-              <h3 style={{ fontSize: '1.15rem', color: '#fff' }}>Tabla Estadística Consolidada por Categoría</h3>
+              <h3 style={{ fontSize: '1.15rem', color: '#fff' }}>Tabla EstadÃ­stica Consolidada por CategorÃ­a</h3>
             </div>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)', color: '#94a3b8' }}>
-                    <th style={{ padding: '0.85rem 1.25rem' }}>Categoría</th>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>CategorÃ­a</th>
                     <th style={{ padding: '0.85rem 1.25rem', textAlign: 'center' }}>Total Productos</th>
                     <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Precio Promedio</th>
-                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'center' }}>Rango [Mín - Máx]</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'center' }}>Rango [MÃ­n - MÃ¡x]</th>
                     <th style={{ padding: '0.85rem 1.25rem', textAlign: 'center' }}>Stock Total</th>
                     <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Valor Estimado</th>
                     <th style={{ padding: '0.85rem 1.25rem', textAlign: 'center' }}>Ofertas</th>
@@ -872,7 +908,7 @@ export const ReportesPage: React.FC = () => {
                         <tr>
                           <td colSpan={8} style={{ padding: '1.25rem', background: 'rgba(99, 102, 241, 0.05)', borderBottom: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 600 }}>
-                              PRODUCTOS CONCATENADOS EN ESTA CATEGORÍA (Cursor SQL GROUP_CONCAT):
+                              PRODUCTOS CONCATENADOS EN ESTA CATEGORÃA (Cursor SQL GROUP_CONCAT):
                             </div>
                             <div style={{ fontSize: '0.9rem', color: '#e2e8f0', lineHeight: 1.6 }}>
                               {cat.productos || 'Sin productos registrados.'}
@@ -892,7 +928,7 @@ export const ReportesPage: React.FC = () => {
       )}
 
       {/* =========================================================================
-          TAB 3: CATÁLOGO POR FERIA (CURSOR 3)
+          TAB 3: CATÃLOGO POR FERIA (CURSOR 3)
           ========================================================================= */}
       {activeTab === 'catalogo' && (
         <div>
@@ -900,7 +936,7 @@ export const ReportesPage: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.6rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Store style={{ color: '#0ea5e9' }} size={24} /> Catálogo de Productos Ofrecidos por Feria
+                <Store style={{ color: '#0ea5e9' }} size={24} /> CatÃ¡logo de Productos Ofrecidos por Feria
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
                 Generado mediante el cursor parametrizado <code>sp_catalogo_productos_feria(IN p_idFeria)</code>.
@@ -927,7 +963,7 @@ export const ReportesPage: React.FC = () => {
               </div>
             </div>
             <div className="glass-card" style={{ padding: '1.25rem' }}>
-              <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Valor Total del Catálogo</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Valor Total del CatÃ¡logo</div>
               <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>
                 Bs {catalogo.reduce((acc, c) => acc + (c.valorStock || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
@@ -971,7 +1007,7 @@ export const ReportesPage: React.FC = () => {
                   color: '#fff',
                 }}
               >
-                <option value="ALL">Todas las Categorías</option>
+                <option value="ALL">Todas las CategorÃ­as</option>
                 {availableCatalogoCategorias.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -1000,7 +1036,7 @@ export const ReportesPage: React.FC = () => {
           {loadingCatalogo ? (
             <div style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
               <RefreshCw className="spin" size={32} style={{ margin: '0 auto 1rem' }} />
-              Cargando catálogo mediante cursor SQL para Feria #{selectedFeriaId}...
+              Cargando catÃ¡logo mediante cursor SQL para Feria #{selectedFeriaId}...
             </div>
           ) : filteredCatalogo.length === 0 ? (
             <div className="glass-card" style={{ padding: '3.5rem', textAlign: 'center', color: '#94a3b8' }}>
@@ -1019,7 +1055,7 @@ export const ReportesPage: React.FC = () => {
                       <div>
                         <h3 style={{ fontSize: '1.25rem', color: '#fff' }}>Stand #{s.nroStand}</h3>
                         <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                          Ubicación interna: {s.ubicacionInterna || 'Principal'}
+                          UbicaciÃ³n interna: {s.ubicacionInterna || 'Principal'}
                         </span>
                       </div>
                     </div>
@@ -1045,7 +1081,7 @@ export const ReportesPage: React.FC = () => {
                       <thead>
                         <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)', color: '#94a3b8' }}>
                           <th style={{ padding: '0.65rem 1rem' }}>Producto</th>
-                          <th style={{ padding: '0.65rem 1rem' }}>Categoría</th>
+                          <th style={{ padding: '0.65rem 1rem' }}>CategorÃ­a</th>
                           <th style={{ padding: '0.65rem 1rem', textAlign: 'right' }}>Precio Unit.</th>
                           <th style={{ padding: '0.65rem 1rem', textAlign: 'center' }}>Stock</th>
                           <th style={{ padding: '0.65rem 1rem', textAlign: 'center' }}>Unidad</th>
@@ -1091,7 +1127,7 @@ export const ReportesPage: React.FC = () => {
                     </div>
                     <h4 style={{ fontSize: '1.2rem', color: '#fff', marginBottom: '0.4rem' }}>{prod.producto}</h4>
                     <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: 1.4 }}>
-                      {prod.descripcion || 'Sin descripción detallada.'}
+                      {prod.descripcion || 'Sin descripciÃ³n detallada.'}
                     </p>
                   </div>
                   <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.85rem' }}>
@@ -1115,7 +1151,7 @@ export const ReportesPage: React.FC = () => {
       )}
 
       {/* =========================================================================
-          TAB 4: MÉTRICAS Y FUNCIONES SQL (sp_metricas_clave_feria, etc.)
+          TAB 4: MÃ‰TRICAS Y FUNCIONES SQL (sp_metricas_clave_feria, etc.)
           ========================================================================= */}
       {activeTab === 'metricas' && (
         <div>
@@ -1123,7 +1159,7 @@ export const ReportesPage: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.6rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <TrendingUp style={{ color: '#10b981' }} size={24} /> Métricas Clave y Funciones de la Feria
+                <TrendingUp style={{ color: '#10b981' }} size={24} /> MÃ©tricas Clave y Funciones de la Feria
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
                 Consolida en una sola llamada los indicadores calculados en MySQL: <code>fn_total_stands()</code>,{' '}
@@ -1141,11 +1177,11 @@ export const ReportesPage: React.FC = () => {
           {loadingMetricas ? (
             <div style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
               <RefreshCw className="spin" size={32} style={{ margin: '0 auto 1rem' }} />
-              Consultando métricas en la base de datos...
+              Consultando mÃ©tricas en la base de datos...
             </div>
           ) : !metricas ? (
             <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
-              Seleccione una feria para ver sus métricas.
+              Seleccione una feria para ver sus mÃ©tricas.
             </div>
           ) : (
             <div>
@@ -1200,7 +1236,7 @@ export const ReportesPage: React.FC = () => {
                 <div className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <h3 style={{ fontSize: '1.2rem', color: '#fff' }}>Porcentaje de Ocupación de Stands</h3>
+                      <h3 style={{ fontSize: '1.2rem', color: '#fff' }}>Porcentaje de OcupaciÃ³n de Stands</h3>
                       <span className="badge badge-primary">{metricas.porcentajeOcupacion}%</span>
                     </div>
 
@@ -1231,7 +1267,7 @@ export const ReportesPage: React.FC = () => {
                   </div>
 
                   <div style={{ marginTop: '1.5rem', background: 'rgba(0,0,0,0.2)', padding: '0.85rem 1rem', borderRadius: '8px', fontSize: '0.85rem', color: '#cbd5e1' }}>
-                    Ocupación real: <strong>{metricas.standsOcupados}</strong> de <strong>{metricas.totalStands}</strong> stands disponibles.
+                    OcupaciÃ³n real: <strong>{metricas.standsOcupados}</strong> de <strong>{metricas.totalStands}</strong> stands disponibles.
                   </div>
                 </div>
 
@@ -1239,7 +1275,7 @@ export const ReportesPage: React.FC = () => {
                 <div className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <h3 style={{ fontSize: '1.2rem', color: '#fff' }}>Actualización de Estado de Feria</h3>
+                      <h3 style={{ fontSize: '1.2rem', color: '#fff' }}>ActualizaciÃ³n de Estado de Feria</h3>
                       <span className="badge badge-success">{metricas.estadoDeterminado}</span>
                     </div>
 
@@ -1249,7 +1285,7 @@ export const ReportesPage: React.FC = () => {
                         Reglas aplicadas:
                       </div>
                       <ul style={{ paddingLeft: '1.25rem', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.6 }}>
-                        <li>Si está "Cancelada", se preserva su cancelación.</li>
+                        <li>Si estÃ¡ "Cancelada", se preserva su cancelaciÃ³n.</li>
                         <li>fecha actual &lt; fecha_ini &rarr; <strong>Planificada</strong></li>
                         <li>fecha actual &le; fecha_fin &rarr; <strong>Activa</strong></li>
                         <li>fecha actual &gt; fecha_fin &rarr; <strong>Finalizada</strong></li>
@@ -1281,11 +1317,11 @@ export const ReportesPage: React.FC = () => {
           {/* Header */}
           <div style={{ marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '1.6rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <ShieldAlert style={{ color: '#f59e0b' }} size={26} /> Laboratorio de Verificación de Triggers
+              <ShieldAlert style={{ color: '#f59e0b' }} size={26} /> Laboratorio de VerificaciÃ³n de Triggers
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
               Los triggers se ejecutan directamente dentro del motor MySQL 8.0 al ocurrir eventos INSERT o UPDATE.
-              Utiliza esta consola para probar y comprobar cómo la base de datos reacciona y protege las reglas de negocio.
+              Utiliza esta consola para probar y comprobar cÃ³mo la base de datos reacciona y protege las reglas de negocio.
             </p>
           </div>
 
@@ -1299,17 +1335,17 @@ export const ReportesPage: React.FC = () => {
                 </div>
 
                 <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
-                  Cambio automático a "Ocupado"
+                  Cambio automÃ¡tico a "Ocupado"
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
                   Al registrar un expositor en un stand mediante <code>CONFORMAN</code>, el trigger actualiza inmediatamente
-                  el estado del stand correspondiente a <code>'Ocupado'</code> sin necesidad de intervención manual del frontend.
+                  el estado del stand correspondiente a <code>'Ocupado'</code> sin necesidad de intervenciÃ³n manual del frontend.
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'block', marginBottom: '0.35rem' }}>
-                      Número de Stand a Ocupar:
+                      NÃºmero de Stand a Ocupar:
                     </label>
                     <input
                       type="number"
@@ -1374,7 +1410,7 @@ export const ReportesPage: React.FC = () => {
                     }}
                   >
                     <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.3rem' }}>
-                      ✓ {trigger1Result.mensaje}
+                      âœ“ {trigger1Result.mensaje}
                     </div>
                     <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
                       Estado previo del stand: <strong>{trigger1Result.estadoStandAnterior || 'Disponible'}</strong>
@@ -1396,103 +1432,143 @@ export const ReportesPage: React.FC = () => {
               </button>
             </div>
 
-            {/* TRIGGER 2 & 3: trg_validar_stock_insert / update */}
-            <div className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <span className="badge badge-warning">Triggers 2 & 3</span>
-                  <span style={{ fontSize: '0.78rem', color: '#818cf8', fontWeight: 600 }}>BEFORE INSERT/UPDATE ON OFRECE</span>
-                </div>
-
-                <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
-                  Validación de Stock Negativo
-                </h3>
-                <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
-                  Impide que se registre o actualice una oferta con stock menor a cero. Si se intenta ingresar un valor negativo,
-                  MySQL dispara <code>SIGNAL SQLSTATE '45000'</code> con el mensaje exacto: <em>"Error: el stock no puede ser menor a cero"</em>.
-                </p>
-
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'block', marginBottom: '0.35rem' }}>
-                    Cantidad de Stock a Probar (ingresa un valor negativo para forzar el trigger):
-                  </label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                      type="number"
-                      value={t2Stock}
-                      onChange={(e) => setT2Stock(Number(e.target.value))}
-                      style={{
-                        flex: 1,
-                        padding: '0.6rem 0.85rem',
-                        background: 'var(--bg-input)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '8px',
-                        color: '#fff',
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setT2Stock(-10)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ whiteSpace: 'nowrap' }}
-                    >
-                      Poner -10
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setT2Stock(15)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ whiteSpace: 'nowrap' }}
-                    >
-                      Poner +15
-                    </button>
-                  </div>
-                </div>
-
-                {trigger2Error && (
-                  <div
-                    style={{
-                      background: 'rgba(239, 68, 68, 0.1)',
-                      border: '1px solid rgba(239, 68, 68, 0.3)',
-                      borderRadius: '8px',
-                      padding: '1rem',
-                      marginBottom: '1.5rem',
-                    }}
-                  >
-                    <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.3rem' }}>
-                      🛡️ Trigger Bloqueó la Operación con Éxito:
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
-                      Mensaje de MySQL: <em>"{trigger2Error}"</em>
-                    </div>
-                  </div>
-                )}
-
-                {trigger2Result && (
-                  <div
-                    style={{
-                      background: 'rgba(16, 185, 129, 0.1)',
-                      border: '1px solid rgba(16, 185, 129, 0.3)',
-                      borderRadius: '8px',
-                      padding: '1rem',
-                      marginBottom: '1.5rem',
-                    }}
-                  >
-                    <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.9rem' }}>
-                      ✓ {trigger2Result.mensaje}
-                    </div>
-                  </div>
-                )}
+            {/* TRIGGER 2 & 3: trg_validar_stock_insert / update — FORMULARIO COMPLETO */}
+            <div className="glass-card" style={{ padding: '2rem' }}>
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <span className="badge badge-warning">Triggers 2 &amp; 3</span>
+                <span style={{ fontSize: '0.78rem', color: '#818cf8', fontWeight: 600 }}>BEFORE INSERT/UPDATE ON OFRECE</span>
               </div>
+
+              <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.4rem' }}>
+                Agregar Producto a un Stand — Validación de Stock
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
+                Simula el <code>INSERT INTO OFRECE</code> (o <code>UPDATE</code> si ya existe). MySQL dispara
+                {' '}<code>trg_validar_stock_insert</code> / <code>trg_validar_stock_update</code>{' '}
+                y bloquea con <code>SIGNAL SQLSTATE '45000'</code> si el stock es negativo.
+              </p>
+
+              {t2LoadingSelects ? (
+                <div style={{ color: '#94a3b8', textAlign: 'center', padding: '1rem' }}>
+                  <RefreshCw className="spin" size={16} style={{ display: 'inline' }} /> Cargando stands y productos...
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+
+                  <div style={{ background: 'rgba(129,140,248,0.08)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.85rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>📅 Feria seleccionada</span>
+                    <strong style={{ color: '#c084fc' }}>
+                      {feriasList.find(f => f.idFeria === selectedFeriaId)?.nombre || `Feria #${selectedFeriaId}`}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'block', marginBottom: '0.35rem' }}>
+                      Stand de la Feria <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <select value={t2NroStand} onChange={(e) => setT2NroStand(Number(e.target.value))} className="input-field">
+                      <option value="">— Selecciona un stand —</option>
+                      {t2StandsList.map((s) => (
+                        <option key={s.nroStand} value={s.nroStand}>
+                          Stand #{s.nroStand} — {s.ubicacionInterna || 'Sin ubicación'} [{s.estado}]
+                        </option>
+                      ))}
+                    </select>
+                    {t2StandsList.length === 0 && (
+                      <p style={{ fontSize: '0.78rem', color: '#ef4444', marginTop: '0.3rem' }}>
+                        Esta feria no tiene stands. Crea uno en Gestión de Ferias → Stands.
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'block', marginBottom: '0.35rem' }}>
+                      Producto <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <select value={t2IdProducto} onChange={(e) => setT2IdProducto(Number(e.target.value))} className="input-field">
+                      <option value="">— Selecciona un producto —</option>
+                      {t2ProductosList.map((p) => (
+                        <option key={p.idProducto} value={p.idProducto}>
+                          [{p.categoria}] {p.nombre} — Bs. {Number(p.precio).toFixed(2)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'block', marginBottom: '0.35rem' }}>Unidad de Medida</label>
+                      <select value={t2UnidadMedida} onChange={(e) => setT2UnidadMedida(e.target.value)} className="input-field">
+                        {['Unidad', 'Kilogramo', 'Litro', 'Caja', 'Paquete', 'Metro', 'Docena'].map(u => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'block', marginBottom: '0.35rem' }}>
+                        Stock Inicial <span style={{ color: '#94a3b8', fontWeight: 400 }}>(negativo → activa trigger)</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={t2Stock}
+                        onChange={(e) => setT2Stock(e.target.value === '' ? '' : Number(e.target.value))}
+                        style={{
+                          width: '100%', padding: '0.6rem 0.85rem',
+                          background: 'var(--bg-input)',
+                          border: `1px solid ${Number(t2Stock) < 0 ? 'rgba(239,68,68,0.6)' : 'var(--border)'}`,
+                          borderRadius: '8px', color: Number(t2Stock) < 0 ? '#ef4444' : '#fff',
+                          fontWeight: Number(t2Stock) < 0 ? 700 : 400,
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.4rem' }}>
+                        <button type="button" onClick={() => setT2Stock(-5)} style={{ flex: 1, padding: '0.3rem', background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer' }}>
+                          -5 (Falla)
+                        </button>
+                        <button type="button" onClick={() => setT2Stock(10)} style={{ flex: 1, padding: '0.3rem', background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer' }}>
+                          +10 (OK)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '0.85rem 1rem', fontFamily: 'monospace', fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.7 }}>
+                    <span style={{ color: '#818cf8' }}>INSERT INTO</span>{' '}
+                    <span style={{ color: '#f59e0b' }}>OFRECE</span>
+                    {' '}(IDFERIA, NROSTAND, IDPRODUCTO, UNIDADMEDIDA, STOCK)<br />
+                    <span style={{ color: '#818cf8' }}>VALUES</span>{' '}(
+                    <span style={{ color: '#10b981' }}>{selectedFeriaId}</span>,{' '}
+                    <span style={{ color: '#10b981' }}>{t2NroStand || '?'}</span>,{' '}
+                    <span style={{ color: '#10b981' }}>{t2IdProducto || '?'}</span>,{' '}
+                    <span style={{ color: '#fbbf24' }}>'{t2UnidadMedida}'</span>,{' '}
+                    <span style={{ color: Number(t2Stock) < 0 ? '#ef4444' : '#10b981', fontWeight: 700 }}>{t2Stock}</span>);
+                  </div>
+                </div>
+              )}
+
+              {trigger2Error && (
+                <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.4rem' }}>🛡️ Trigger Activado — Operación Bloqueada</div>
+                  <div style={{ fontSize: '0.82rem', color: '#fca5a5', fontFamily: 'monospace' }}>SQLSTATE '45000': {trigger2Error}</div>
+                </div>
+              )}
+
+              {trigger2Result && (
+                <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.3rem' }}>✅ Stock válido — Trigger permitió la operación</div>
+                  <div style={{ fontSize: '0.85rem', color: '#6ee7b7' }}>{trigger2Result.mensaje}</div>
+                </div>
+              )}
 
               <button
                 onClick={handleTestTrigger2}
-                disabled={trigger2Loading}
+                disabled={trigger2Loading || t2LoadingSelects}
                 className="btn btn-primary"
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
               >
                 {trigger2Loading ? <RefreshCw className="spin" size={16} /> : <Zap size={16} />}
-                {trigger2Loading ? 'Enviando a MySQL...' : 'Intentar Guardar Oferta'}
+                {trigger2Loading ? 'Ejecutando INSERT/UPDATE en MySQL...' : Number(t2Stock) < 0 ? '⚠️ Intentar Guardar (Trigger debería bloquear)' : '✅ Guardar Oferta en OFRECE'}
               </button>
             </div>
 
@@ -1505,11 +1581,11 @@ export const ReportesPage: React.FC = () => {
                 </div>
 
                 <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
-                  Validación de Fechas de Feria
+                  ValidaciÃ³n de Fechas de Feria
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>
-                  Impide crear o modificar una feria cuya fecha de finalización sea anterior a la fecha de inicio.
-                  MySQL cancela la transacción con el error exacto:{' '}
+                  Impide crear o modificar una feria cuya fecha de finalizaciÃ³n sea anterior a la fecha de inicio.
+                  MySQL cancela la transacciÃ³n con el error exacto:{' '}
                   <em>"Error: la fecha de finalizacion no puede ser anterior a la fecha de inicio"</em>.
                 </p>
 
@@ -1563,7 +1639,7 @@ export const ReportesPage: React.FC = () => {
                     }}
                   >
                     <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.3rem' }}>
-                      🛡️ Trigger Bloqueó la Operación con Éxito:
+                      ðŸ›¡ï¸ Trigger BloqueÃ³ la OperaciÃ³n con Ã‰xito:
                     </div>
                     <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
                       Mensaje de MySQL: <em>"{trigger3Error}"</em>
@@ -1582,7 +1658,7 @@ export const ReportesPage: React.FC = () => {
                     }}
                   >
                     <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.9rem' }}>
-                      ✓ {trigger3Result.mensaje}
+                      âœ“ {trigger3Result.mensaje}
                     </div>
                   </div>
                 )}
@@ -1603,7 +1679,7 @@ export const ReportesPage: React.FC = () => {
       )}
 
       {/* =========================================================================
-          TAB 6: DIAGNÓSTICO DE LA BASE DE DATOS MYSQL
+          TAB 6: DIAGNÃ“STICO DE LA BASE DE DATOS MYSQL
           ========================================================================= */}
       {activeTab === 'diagnostico' && (
         <div>
@@ -1612,8 +1688,8 @@ export const ReportesPage: React.FC = () => {
               <Database style={{ color: '#818cf8' }} size={24} /> Estado en Tiempo Real de Objetos MySQL
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Inspección directa de <code>information_schema.ROUTINES</code> e <code>information_schema.TRIGGERS</code>.
-              Si algún objeto aún no ha sido ejecutado en DBeaver o MySQL, el sistema funciona de manera 100% transparente
+              InspecciÃ³n directa de <code>information_schema.ROUTINES</code> e <code>information_schema.TRIGGERS</code>.
+              Si algÃºn objeto aÃºn no ha sido ejecutado en DBeaver o MySQL, el sistema funciona de manera 100% transparente
               mediante el motor de fallback integrado.
             </p>
           </div>
@@ -1625,7 +1701,7 @@ export const ReportesPage: React.FC = () => {
             </div>
           ) : !diagnostico ? (
             <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
-              No se pudo obtener el diagnóstico de la base de datos.
+              No se pudo obtener el diagnÃ³stico de la base de datos.
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.75rem' }}>
@@ -1650,7 +1726,7 @@ export const ReportesPage: React.FC = () => {
                     >
                       <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.9rem' }}>{p.nombre}()</span>
                       <span className={`badge ${p.existe ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.75rem' }}>
-                        {p.existe ? '✓ En MySQL' : 'Fallback Activo'}
+                        {p.existe ? 'âœ“ En MySQL' : 'Fallback Activo'}
                       </span>
                     </div>
                   ))}
@@ -1678,7 +1754,7 @@ export const ReportesPage: React.FC = () => {
                     >
                       <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.9rem' }}>{fn.nombre}()</span>
                       <span className={`badge ${fn.existe ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.75rem' }}>
-                        {fn.existe ? '✓ En MySQL' : 'Fallback Activo'}
+                        {fn.existe ? 'âœ“ En MySQL' : 'Fallback Activo'}
                       </span>
                     </div>
                   ))}
@@ -1711,7 +1787,7 @@ export const ReportesPage: React.FC = () => {
                         </div>
                       </div>
                       <span className={`badge ${t.existe ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.75rem' }}>
-                        {t.existe ? '✓ En MySQL' : 'Fallback Activo'}
+                        {t.existe ? 'âœ“ En MySQL' : 'Fallback Activo'}
                       </span>
                     </div>
                   ))}
@@ -1735,12 +1811,12 @@ export const ReportesPage: React.FC = () => {
             <Info size={24} style={{ color: '#10b981', flexShrink: 0, marginTop: '2px' }} />
             <div>
               <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.35rem' }}>
-                Información para Carga Directa en MySQL / DBeaver
+                InformaciÃ³n para Carga Directa en MySQL / DBeaver
               </h4>
               <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.5 }}>
                 Los archivos fuente se encuentran en el directorio <code>database/</code> del proyecto:{' '}
                 <code>funciones_procedimientos.sql</code>, <code>triggers.sql</code> y <code>cursores.sql</code>. Al ejecutarlos
-                en MySQL o DBeaver, el sistema detecta automáticamente su presencia y pasa a utilizar los procedimientos y triggers nativos de inmediato.
+                en MySQL o DBeaver, el sistema detecta automÃ¡ticamente su presencia y pasa a utilizar los procedimientos y triggers nativos de inmediato.
               </p>
             </div>
           </div>

@@ -11,7 +11,7 @@
 --   - 320 Cuentas de Expositores (1:1 vinculadas con EXPOSITOR)
 -- Total: 370 usuarios
 -- =========================================================
-
+SET NAMES 'utf8mb4';
 SET FOREIGN_KEY_CHECKS = 0;
 
 INSERT INTO USUARIO (CORREO, PASSWORDHASH, ROL, ESTADO, CIEXPOSITOR) VALUES

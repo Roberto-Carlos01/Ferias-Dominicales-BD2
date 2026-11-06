@@ -905,6 +905,37 @@ export class ReportesService {
   }
 
   // =========================================================================
+  // AUXILIARES PARA SELECTORES DE TRIGGER 2
+  // =========================================================================
+
+  async getStandsList(idFeria: number) {
+    const rows = await this.dataSource.query(
+      `SELECT NROSTAND, ESTADO, ANCHO, LARGO, UBICACIONINTERNA
+       FROM STAND WHERE IDFERIA = ? ORDER BY NROSTAND ASC`,
+      [idFeria],
+    );
+    return rows.map((r: any) => ({
+      nroStand: r.NROSTAND,
+      estado: r.ESTADO,
+      ancho: r.ANCHO,
+      largo: r.LARGO,
+      ubicacionInterna: r.UBICACIONINTERNA,
+    }));
+  }
+
+  async getProductosList() {
+    const rows = await this.dataSource.query(
+      `SELECT IDPRODUCTO, NOMBREPROD, PRECIO, CATEGORIA FROM PRODUCTO ORDER BY NOMBREPROD ASC`,
+    );
+    return rows.map((r: any) => ({
+      idProducto: r.IDPRODUCTO,
+      nombre: r.NOMBREPROD,
+      precio: r.PRECIO,
+      categoria: r.CATEGORIA,
+    }));
+  }
+
+  // =========================================================================
   // AUXILIARES
   // =========================================================================
   private async ensureFeriaExists(idFeria: number): Promise<void> {

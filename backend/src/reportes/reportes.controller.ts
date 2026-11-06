@@ -145,6 +145,20 @@ export class ReportesController {
   }
 
   @Public()
+  @Get('ferias/:id/stands-lista')
+  @ApiOperation({ summary: 'Listar stands de una feria para selectores (Trigger 2)' })
+  getStandsList(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getStandsList(id);
+  }
+
+  @Public()
+  @Get('productos-lista')
+  @ApiOperation({ summary: 'Listar todos los productos para selectores (Trigger 2)' })
+  getProductosList() {
+    return this.service.getProductosList();
+  }
+
+  @Public()
   @Post('triggers/test-stock-negativo')
   @ApiOperation({
     summary:
